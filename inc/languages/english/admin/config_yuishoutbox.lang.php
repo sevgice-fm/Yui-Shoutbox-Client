@@ -76,4 +76,7 @@ $l['yuishoutbox_newpost_lang'] = 'posted in thread {1}';
 $l['yuishoutbox_newthread_lang'] = 'posted new thread {1}';
 $l['yuishoutbox_banusr_title'] = 'Banned users IDs';
 $l['yuishoutbox_banusr_desc'] = 'Set here users that banned from shoutbox. Separate ID with comma.';
+$l['yuishoutbox_bword_title'] = 'Word Filters';
+$l['yuishoutbox_bword_desc'] = 'Set here you want active word filters. If you select yes, Yui Shoutbox will filter bad words.';
+$l['yuishoutbox_without_permission'] = 'You are not allowed to access this action.';
 ?>

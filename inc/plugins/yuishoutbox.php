@@ -21,7 +21,7 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-define('YSB_PLUGIN_VER', '0.1.0');
+define('YSB_PLUGIN_VER', '0.1.4');
 
 function yuishoutbox_info()
 {
@@ -309,6 +309,15 @@ function yuishoutbox_install()
 		'disporder' => 28,
 		'gid'		=> $groupid
 	);
+	$yuishout_setting[] = array(
+		'name' => 'yuishout_bad_word',
+		'title' => $lang->yuishoutbox_bword_title,
+		'description' => $lang->yuishoutbox_bword_desc,
+		'optionscode' => 'yesno',
+		'value' => 0,
+		'disporder' => 29,
+		'gid'		=> $groupid
+	);	
 
 	$db->insert_query_multiple("settings", $yuishout_setting);
 	rebuild_settings();
@@ -349,7 +358,8 @@ function yuishoutbox_uninstall()
 		'yuishout_act_color',
 		'yuishout_des_index',
 		'yuishout_act_port',
-		'yuishout_ban_usr'
+		'yuishout_ban_usr',
+		'yuishout_bad_word'
 	)");
 
 	$db->delete_query("settinggroups", "name = 'yuishoutbox'");
@@ -418,6 +428,8 @@ function yuishoutbox_activate()
 	min_lan = '{\$lang->yuishoutbox_vmin_msg}',
 	max_lan = '{\$lang->yuishoutbox_vmax_msg}',
 	perm_msglan = '{\$lang->yuishoutbox_user_permission}',
+	err_credlan = '{\$lang->yuishoutbox_error_cred}',
+	err_fldlan = '{\$lang->yuishoutbox_error_flood}',
 	numshouts = '{\$mybb->settings['yuishout_num_shouts']}',
 	direction = '{\$mybb->settings['yuishout_shouts_start']}',
 	zoneset = '{\$mybb->settings['yuishout_zone']}',
@@ -482,7 +494,7 @@ opt_editor = {
 
 </script>";
 
-	$new_template_global['templateShoutBox'] = "<table border=\"0\" cellspacing=\"0\" cellpadding=\"4\" class=\"tborder tShout\">
+	$new_template_global['ysb_template'] = "<table border=\"0\" cellspacing=\"0\" cellpadding=\"4\" class=\"tborder tShout\">
 	<thead>
 		<tr>
 			<td class=\"thead theadShout\" colspan=\"1\">
@@ -505,7 +517,7 @@ opt_editor = {
 	</tbody>
 </table>";
 
-	$new_template_global['templateShoutBoxGuest'] = "<table border=\"0\" cellspacing=\"0\" cellpadding=\"4\" class=\"tborder tShout\">
+	$new_template_global['ysb_guest_template'] = "<table border=\"0\" cellspacing=\"0\" cellpadding=\"4\" class=\"tborder tShout\">
 	<thead>
 		<tr>
 			<td class=\"thead theadShout\" colspan=\"1\">
@@ -515,7 +527,6 @@ opt_editor = {
 		</tr>
 	</thead>
 	<tbody style=\"{\$collapsed['yshout_e']}\" id=\"yshout_e\">
-		<tr><td class=\"tcat\"><span class=\"smalltext\"><strong><span>{\$lang->yuishoutbox_notice_msg} : </span><span class='notshow'></span></strong></span></td></tr>
 		<tr>
 			<td class=\"trow2\">
 				<div class=\"contentShout\">
@@ -534,11 +545,12 @@ opt_editor = {
 	spo_lan = '{\$lang->yuishoutbox_spoiler}',
 	show_lan = '{\$lang->yuishoutbox_show}',
 	hide_lan = '{\$lang->yuishoutbox_hide}',
+	loadlang = '{\$lang->yuishoutbox_load_msg}',
 	prune_shoutlan = '{\$lang->yuishoutbox_prune_shout}',
 	not_msglan = '{\$lang->yuishoutbox_notice_msg}',
 	banlist_modmsglan = '{\$lang->yuishoutbox_banlist_mod}',
 	not_modmsglan = '{\$lang->yuishoutbox_notice_mod}',
-	nuyshouts = '{\$mybb->settings['yuishout_num_shouts']}',
+	numshouts = '{\$mybb->settings['yuishout_num_shouts']}',
 	direction = '{\$mybb->settings['yuishout_shouts_start']}',
 	zoneset = '{\$mybb->settings['yuishout_zone']}',
 	zoneformt = '{\$mybb->settings['yuishout_dataf']}',
@@ -546,8 +558,6 @@ opt_editor = {
 	theme_borderwidth = '{\$theme['borderwidth']}',
 	theme_tablespace = '{\$theme['tablespace']}',
 	imgurapi = '{\$mybb->settings['yuishout_imgurapi']}',
-	orgtit = document.title,
-	ment_borderstyle = '{\$mybb->settings['yuishout_ment_style']}',
 	actavat = '{\$mybb->settings['yuishout_act_avatar']}',
 	actcolor = '{\$mybb->settings['yuishout_act_color']}',
 	socketaddress = '{\$mybb->settings['yuishout_socketio']}';
@@ -559,7 +569,7 @@ yui_smilies = {
 	{\$smilies_json}
 };
 \$(document).ready(function() {
-	yuishout();
+	yuishout_connect();
 });
 </script>";
 
@@ -579,7 +589,7 @@ function yuishoutbox_deactivate()
 	global $db;
 	require MYBB_ROOT.'/inc/adminfunctions_templates.php';
 
-	$db->delete_query("templates", "title IN('codebutyui','templateShoutBox','templateShoutBoxGuest')");
+	$db->delete_query("templates", "title IN('codebutyui','ysb_template','ysb_guest_template')");
 
 	//Exclui templates para as posições da shoutbox
 	find_replace_templatesets("index", '#'.preg_quote('{$yuishout}').'#', '',0);
@@ -599,10 +609,10 @@ function Yui_cache_template()
 	}
 
 	if (THIS_SCRIPT == 'index.php' && !$mybb->settings['yuishout_des_index']) {
-		$templatelist .= 'codebutyui,templateShoutBox,templateShoutBoxGuest';
+		$templatelist .= 'codebutyui,ysb_template,ysb_guest_template';
 	}
 	if (THIS_SCRIPT == 'portal.php' && $mybb->settings['yuishout_act_port']) {
-		$templatelist .= 'codebutyui,templateShoutBox,templateShoutBoxGuest';
+		$templatelist .= 'codebutyui,ysb_template,ysb_guest_template';
 	}
 }
 
@@ -799,29 +809,28 @@ function yuishout() {
 	}
 
 	if(!in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_grups_acc'])) && $mybb->user['uid']!=0) {
-		eval("\$yuishout = \"".$templates->get("templateShoutBox")."\";");
+		eval("\$yuishout = \"".$templates->get("ysb_template")."\";");
 	}
 	elseif ($mybb->user['uid']==0 && $settings['yuishout_guest']==1) {
-		eval("\$yuishout = \"".$templates->get("templateShoutBoxGuest")."\";");
+		eval("\$yuishout = \"".$templates->get("ysb_guest_template")."\";");
 	}
 }
 
 function sendPostDataYSB($type, $data) {
+
 	global $mybb, $settings;
-	session_start();
-	$strCookie = session_name()."=".session_id()."; path=".session_save_path();
+
 	$baseurl = $settings['yuishout_server'];
 	$emiturl = $baseurl."/".$type."";
-	session_write_close();
 	$ch = curl_init($emiturl);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Origin: http://'.$_SERVER['HTTP_HOST'].'', 'Content-Type: application/json'));
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_COOKIE, $strCookie);
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	curl_setopt($ch, CURLOPT_USERPWD, "".$settings['yuishout_server_username'].":".$settings['yuishout_server_password']."");
 	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 	$result = curl_exec($ch);
+	curl_close($ch);
 	return $result;
 }
 
@@ -851,8 +860,7 @@ function ysb_newthread()
 			"fltime" => 0
 		);
 
-		echo sendPostDataYSB('message', $data);
-		exit;
+		sendPostDataYSB('message', $data);
 	}
 }
 
@@ -881,8 +889,7 @@ function ysb_newpost()
 			"fltime" => 0
 		);
 
-		echo sendPostDataYSB('message', $data);
-		exit;
+		sendPostDataYSB('message', $data);
 	}
 }
 
@@ -897,6 +904,8 @@ function ysb_listen()
 		$parser = new postParser;
 	}
 	
+	$lang->load('admin/config_yuishoutbox');
+	
 	switch ($mybb->input['action']) {
 
 		case 'message':
@@ -907,7 +916,7 @@ function ysb_listen()
 				xmlhttp_error($lang->invalid_post_code);
 			}
 
-			if (($mybb->input['action'] == "message") && (!in_array((int)$mybb->user['uid'],explode(',',$mybb->settings['yuishout_ban_usr'])) || in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_mod_grups'])))){
+			if (!in_array((int)$mybb->user['uid'],explode(',',$mybb->settings['yuishout_ban_usr'])) || in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_mod_grups']))){
 					$name = format_name($mybb->user['username'], $mybb->user['usergroup'], $mybb->user['displaygroup']);
 					
 					if (!$settings['yuishout_lim_character']) {
@@ -915,6 +924,16 @@ function ysb_listen()
 					}
 					else {
 						$msg = substr(htmlspecialchars_uni($_POST['msg']), 0, $settings['yuishout_lim_character']);		
+					}
+					
+					if ((int)$settings['yuishout_bad_word']) {
+						$options = [
+							'allow_mycode'    => 0,
+							'allow_smilies'   => 0,
+							'allow_imgcode'   => 0,
+							'filter_badwords' => 1
+						];
+						$msg = $parser->parse_message($msg, $options);
 					}
 
 					$data = array(
@@ -930,7 +949,7 @@ function ysb_listen()
 					echo sendPostDataYSB('message', $data);
 					exit;
 			}
-			xmlhttp_error($lang->invalid_post_code);			
+			xmlhttp_error($lang->yuishoutbox_without_permission);			
 			
 		break;
 
@@ -942,36 +961,48 @@ function ysb_listen()
 				xmlhttp_error($lang->invalid_post_code);
 			}
 
-			if ($mybb->input['action'] == "updmsg"){
+			if (!$settings['yuishout_lim_character']) {
+				$msg = htmlspecialchars_uni($_POST['newmsg']);
+			}
+			else {
+				$msg = substr(htmlspecialchars_uni($_POST['newmsg']), 0, $settings['yuishout_lim_character']);		
+			}
 
-				if (!$settings['yuishout_lim_character']) {
-					$msg = htmlspecialchars_uni($_POST['newmsg']);
-				}
-				else {
-					$msg = substr(htmlspecialchars_uni($_POST['newmsg']), 0, $settings['yuishout_lim_character']);		
-				}
-				$data2 = array(
-					"id" => htmlspecialchars_decode($_POST['id']),
-					"newmsg" => $msg
+			if ((int)$settings['yuishout_bad_word']) {
+				$options = [
+					'allow_mycode'    => 0,
+					'allow_smilies'   => 0,
+					'allow_imgcode'   => 0,
+					'filter_badwords' => 1
+				];
+				$msg = $parser->parse_message($msg, $options);
+			}
+
+			$data2 = array(
+				"id" => htmlspecialchars_decode($_POST['id']),
+				"newmsg" => $msg
+			);
+			if(!in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_mod_grups']))) {
+				$data1 = array(
+					"id" => htmlspecialchars_decode($_POST['id'])
 				);
-				if(!in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_mod_grups']))) {
-					$data1 = array(
-						"id" => htmlspecialchars_decode($_POST['id'])
-					);
-					
-					$checkuid = json_decode(sendPostDataYSB('ckuid', $data1));
-
-					if ((int)$checkuid->{'sucess'}==(int)$mybb->user['uid']) {
-						echo sendPostDataYSB('updmsg', $data2);
-						exit;
-					}
+				
+				$checkuid = json_decode(sendPostDataYSB('ckuid', $data1));
+				
+				if ((int)$checkuid->{'error'}==130) {
+					xmlhttp_error($lang->yuishoutbox_without_permission);
 				}
-				else {
+
+				if ((int)$checkuid->{'sucess'}==(int)$mybb->user['uid']) {
 					echo sendPostDataYSB('updmsg', $data2);
 					exit;
 				}
 			}
-			xmlhttp_error($lang->invalid_post_code);
+			else {
+				echo sendPostDataYSB('updmsg', $data2);
+				exit;
+			}
+			xmlhttp_error($lang->yuishoutbox_without_permission);
 
 		break;
 
@@ -984,7 +1015,7 @@ function ysb_listen()
 				xmlhttp_error($lang->invalid_post_code);
 			}
 
-			if ($mybb->input['action'] == "updbanl" && in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_mod_grups']))){
+			if (in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_mod_grups']))){
 				$data = array(
 					"ban" => htmlspecialchars_uni($_POST['ban'])
 				);	
@@ -993,7 +1024,7 @@ function ysb_listen()
 				echo sendPostDataYSB('updbanl', $data);
 				exit;
 			}
-			xmlhttp_error($lang->invalid_post_code);
+			xmlhttp_error($lang->yuishoutbox_without_permission);
 
 		break;
 
@@ -1006,15 +1037,15 @@ function ysb_listen()
 				xmlhttp_error($lang->invalid_post_code);
 			}
 
-			if ($mybb->input['action'] == "purge" && in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_mod_grups']))){
+			if (in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_mod_grups']))){
 				echo sendPostDataYSB('purge', []);
 				exit;
 			}
-			xmlhttp_error($lang->invalid_post_code);
+			xmlhttp_error($lang->yuishoutbox_without_permission);
 			
 		break;
 		
-		case 'purge':
+		case 'rmvmsg':
 
 			if ($mybb->input['action'] != "rmvmsg" || $mybb->request_method != "post"){return false;exit;}
 
@@ -1023,27 +1054,27 @@ function ysb_listen()
 				xmlhttp_error($lang->invalid_post_code);
 			}
 
-			if ($mybb->input['action'] == "rmvmsg"){
+			$data = array(
+				"id" => htmlspecialchars_decode($_POST['id'])
+			);
+			if(!in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_mod_grups']))) {
 
-				$data = array(
-					"id" => htmlspecialchars_decode($_POST['id'])
-				);
-				if(!in_array((int)$mybb->user['usergroup'],explode(',',$mybb->settings['yuishout_mod_grups']))) {
+				$checkuid = json_decode(sendPostDataYSB('ckuid', $data));
 
-					$checkuid = json_decode(sendPostDataYSB('ckuid', $data));
-
-					if ((int)$checkuid->{'sucess'}==(int)$mybb->user['uid']) {
-						echo sendPostDataYSB('rmvmsg', $data);
-						exit;
-					}
+				if ((int)$checkuid->{'error'}==130) {
+					xmlhttp_error($lang->yuishoutbox_without_permission);
 				}
-				else {
+
+				if ((int)$checkuid->{'sucess'}==(int)$mybb->user['uid']) {
 					echo sendPostDataYSB('rmvmsg', $data);
 					exit;
 				}
-				xmlhttp_error($lang->invalid_post_code);
 			}
-			xmlhttp_error($lang->invalid_post_code);
+			else {
+				echo sendPostDataYSB('rmvmsg', $data);
+				exit;
+			}
+			xmlhttp_error($lang->yuishoutbox_without_permission);
 
 		break;
 	}

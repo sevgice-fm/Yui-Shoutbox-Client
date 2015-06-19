@@ -39,6 +39,7 @@
 	font-family: sans-serif,Tahoma,Verdana,Arial;
 	padding-bottom: 8px;
 	padding-top: 8px;
+	word-break: break-all;
 }
 .msgShout > .time_msgShout{
 	margin-right: 4px;

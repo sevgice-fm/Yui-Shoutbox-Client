@@ -180,18 +180,31 @@ function emitajax(type, data) {
 		data: data,
 		url: 'xmlhttp.php?action='+type+'&my_post_key='+my_post_key
 	}).done(function (result) {
-		var IS_JSON = true;
-		try {
-			var json = $.parseJSON(result);
-		}
-		catch(err) {
-			IS_JSON = false;
-		}
-		if (IS_JSON) {
-			return JSON.parse(result);		
-		}
-		else {
-			return result;
+		if (JSON.parse(result).error) {
+			if (JSON.parse(result).error=='260') {
+				if(!$('#incadm_cred').length) {
+					$('<div/>', { id: 'incadm_cred', class: 'top-right' }).appendTo('body');
+				}
+				setTimeout(function() {
+					$('#incadm_cred').jGrowl(err_credlan, { life: 1500 });
+				},200);
+			}
+			if (JSON.parse(result).error=='220') {
+				if(!$('#incadm_cred').length) {
+					$('<div/>', { id: 'incadm_cred', class: 'top-right' }).appendTo('body');
+				}
+				setTimeout(function() {
+					$('#incadm_cred').jGrowl(err_credlan, { life: 1500 });
+				},200);
+			}
+			if (JSON.parse(result).error=='110') {
+				if(!$('#er_flood').length) {
+					$('<div/>', { id: 'er_flood', class: 'top-right' }).appendTo('body');
+				}
+				setTimeout(function() {
+					$('#er_flood').jGrowl(err_fldlan, { life: 1500 });
+				},200);
+			}
 		}
 	});
 };
