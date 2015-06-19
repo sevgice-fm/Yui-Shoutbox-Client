@@ -21,7 +21,7 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-define('YSB_PLUGIN_VER', '0.2.0');
+define('YSB_PLUGIN_VER', '0.2.5');
 
 function yuishoutbox_info()
 {
@@ -192,12 +192,21 @@ function yuishoutbox_install()
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
+		'name' => 'yuishout_bad_word',
+		'title' => $lang->yuishoutbox_bword_title,
+		'description' => $lang->yuishoutbox_bword_desc,
+		'optionscode' => 'yesno',
+		'value' => 0,
+		'disporder' => 16,
+		'gid'		=> $groupid
+	);	
+	$yuishout_setting[] = array(
 		'name' => 'yuishout_newpost',
 		'title' => $lang->yuishoutbox_newpost_title,
 		'description' => $lang->yuishoutbox_newpost_desc,
 		'optionscode' => 'yesno',
 		'value' => 1,
-		'disporder' => 16,
+		'disporder' => 17,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -206,7 +215,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_newthread_desc,
 		'optionscode' => 'yesno',
 		'value' => 1,
-		'disporder' => 17,
+		'disporder' => 18,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -215,7 +224,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_foldacc_desc,
 		'optionscode' => 'text',
 		'value' => '',
-		'disporder' => 18,
+		'disporder' => 19,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -224,7 +233,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_newptcolor_desc,
 		'optionscode' => 'text',
 		'value' => '#727272',
-		'disporder' => 19,
+		'disporder' => 20,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -233,7 +242,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_mentstyle_desc,
 		'optionscode' => 'text',
 		'value' => '5px solid #cd0e0a',
-		'disporder' => 20,
+		'disporder' => 21,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -242,7 +251,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_zone_desc,
 		'optionscode' => 'text',
 		'value' => '-3',
-		'disporder' => 21,
+		'disporder' => 22,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -252,7 +261,7 @@ function yuishoutbox_install()
 		'optionscode' => 'radio
 '.$lang->yuishoutbox_shoutstart_opt.'',
 		'value' => 'bottom',
-		'disporder' => 22,
+		'disporder' => 23,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -261,7 +270,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_limcharact_desc,
 		'optionscode' => 'numeric',
 		'value' => 0,
-		'disporder' => 23,
+		'disporder' => 24,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -270,7 +279,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_aavatar_desc,
 		'optionscode' => 'yesno',
 		'value' => 1,
-		'disporder' => 24,
+		'disporder' => 25,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -279,7 +288,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_acolor_desc,
 		'optionscode' => 'yesno',
 		'value' => 1,
-		'disporder' => 25,
+		'disporder' => 26,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -288,7 +297,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_destindx_desc,
 		'optionscode' => 'yesno',
 		'value' => 0,
-		'disporder' => 26,
+		'disporder' => 27,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -297,27 +306,18 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_actport_desc,
 		'optionscode' => 'yesno',
 		'value' => 0,
-		'disporder' => 27,
+		'disporder' => 28,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
 		'name' => 'yuishout_ban_usr',
 		'title' => $lang->yuishoutbox_banusr_title,
 		'description' => $lang->yuishoutbox_banusr_desc,
-		'optionscode' => 'text',
+		'optionscode' => 'textarea',
 		'value' => '',
-		'disporder' => 28,
-		'gid'		=> $groupid
-	);
-	$yuishout_setting[] = array(
-		'name' => 'yuishout_bad_word',
-		'title' => $lang->yuishoutbox_bword_title,
-		'description' => $lang->yuishoutbox_bword_desc,
-		'optionscode' => 'yesno',
-		'value' => 0,
 		'disporder' => 29,
 		'gid'		=> $groupid
-	);	
+	);
 
 	$db->insert_query_multiple("settings", $yuishout_setting);
 	rebuild_settings();
@@ -345,6 +345,7 @@ function yuishoutbox_uninstall()
 		'yuishout_imgurapi',
 		'yuishout_dataf',
 		'yuishout_antiflood',
+		'yuishout_bad_word'
 		'yuishout_newpost',
 		'yuishout_newthread',
 		'yuishout_folder_acc',
@@ -358,8 +359,7 @@ function yuishoutbox_uninstall()
 		'yuishout_act_color',
 		'yuishout_des_index',
 		'yuishout_act_port',
-		'yuishout_ban_usr',
-		'yuishout_bad_word'
+		'yuishout_ban_usr'
 	)");
 
 	$db->delete_query("settinggroups", "name = 'yuishoutbox'");
@@ -896,7 +896,7 @@ function ysb_newpost()
 $plugins->add_hook('xmlhttp', 'ysb_listen');
 function ysb_listen()
 {
-	global $mybb, $lang, $parser, $settings;
+	global $mybb, $lang, $parser, $settings, $db;
 	
 	if (!is_object($parser))
 	{
@@ -1019,7 +1019,7 @@ function ysb_listen()
 				$data = array(
 					"ban" => htmlspecialchars_uni($_POST['ban'])
 				);	
-				$db->update_query("settings", ['value' => $db->escape_string(htmlspecialchars_uni($_POST['ban']))], "name='yuishout_ban_usr'");
+				$db->update_query("settings", ['value' => $db->escape_string($_POST['ban'])], "name='yuishout_ban_usr'");
 				rebuild_settings();
 				echo sendPostDataYSB('updbanl', $data);
 				exit;

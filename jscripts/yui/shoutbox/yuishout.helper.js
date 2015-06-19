@@ -180,30 +180,59 @@ function emitajax(type, data) {
 		data: data,
 		url: 'xmlhttp.php?action='+type+'&my_post_key='+my_post_key
 	}).done(function (result) {
-		if (JSON.parse(result).error) {
-			if (JSON.parse(result).error=='260') {
-				if(!$('#incadm_cred').length) {
-					$('<div/>', { id: 'incadm_cred', class: 'top-right' }).appendTo('body');
+		var IS_JSON = true;
+		try {
+			var json = $.parseJSON(result);
+		}
+		catch(err) {
+			IS_JSON = false;
+		}
+		if (IS_JSON) {
+			if (JSON.parse(result).error) {
+				if (JSON.parse(result).error=='260') {
+					if(!$('#incadm_cred').length) {
+						$('<div/>', { id: 'incadm_cred', class: 'top-right' }).appendTo('body');
+					}
+					setTimeout(function() {
+						$('#incadm_cred').jGrowl(err_credlan, { life: 1500 });
+					},200);
 				}
-				setTimeout(function() {
-					$('#incadm_cred').jGrowl(err_credlan, { life: 1500 });
-				},200);
+				if (JSON.parse(result).error=='220') {
+					if(!$('#incadm_cred').length) {
+						$('<div/>', { id: 'incadm_cred', class: 'top-right' }).appendTo('body');
+					}
+					setTimeout(function() {
+						$('#incadm_cred').jGrowl(err_credlan, { life: 1500 });
+					},200);
+				}
+				if (JSON.parse(result).error=='110') {
+					if(!$('#er_flood').length) {
+						$('<div/>', { id: 'er_flood', class: 'top-right' }).appendTo('body');
+					}
+					setTimeout(function() {
+						$('#er_flood').jGrowl(err_fldlan, { life: 1500 });
+					},200);
+				}
 			}
-			if (JSON.parse(result).error=='220') {
-				if(!$('#incadm_cred').length) {
-					$('<div/>', { id: 'incadm_cred', class: 'top-right' }).appendTo('body');
+		}
+		else {
+			if(typeof result == 'object')
+			{
+				if(result.hasOwnProperty("errors"))
+				{
+					$.each(result.errors, function(i, message)
+					{
+						if(!$('#er_others').length) {
+							$('<div/>', { id: 'er_others', class: 'top-right' }).appendTo('body');
+						}
+						setTimeout(function() {
+							$('#er_others').jGrowl(message, { life: 1500 });
+						},200);
+					});
 				}
-				setTimeout(function() {
-					$('#incadm_cred').jGrowl(err_credlan, { life: 1500 });
-				},200);
 			}
-			if (JSON.parse(result).error=='110') {
-				if(!$('#er_flood').length) {
-					$('<div/>', { id: 'er_flood', class: 'top-right' }).appendTo('body');
-				}
-				setTimeout(function() {
-					$('#er_flood').jGrowl(err_fldlan, { life: 1500 });
-				},200);
+			else {
+				return result;
 			}
 		}
 	});
