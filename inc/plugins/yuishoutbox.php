@@ -21,7 +21,7 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-define('YSB_PLUGIN_VER', '0.2.5');
+define('YSB_PLUGIN_VER', '1.0.0');
 
 function yuishoutbox_info()
 {
