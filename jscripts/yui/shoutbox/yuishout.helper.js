@@ -36,10 +36,12 @@ function revescapeHtml(text) {
 }
 
 function regexment(text,nick) {
-  var mentregex = text.match(/(?:^|\s)@&quot;([^<]+?)&quot;|(?:^|\s)@&#039;([^<]+?)&#039;|(?:^|\s)@`([^<]+?)`|(?:^|\s)@(?:([^"<>\.,;!?()\[\]{}&\'\s\\]{3,}))/gmi);
-  if (mentregex) {
-	var patt = new RegExp(nick, "gi");
+	text = text.replace(/(<([^>]+)>)/ig,"");
+	var mentregex = text.match(/(?:^|\s)@&quot;([^<]+?)&quot;|(?:^|\s)@&#039;([^<]+?)&#039;|(?:^|\s)@[`´]([^<]+?)[`´]|(?:^|\s)@(?:([^"<>\.,;!?()\[\]{}&\'\s\\]{3,}))/gmi);
+	if (mentregex) {
+		var patt = new RegExp(nick, "gi");
 		for (var i =0;i<mentregex.length;i++) {
+			mentregex[i] = mentregex[i].replace(/(&quot;|&#039;|`|´)/g, '');
 			if(nick.length == (String(mentregex[i]).trim().length - 1)) {
 				res = patt.exec(mentregex[i]);
 				if (nick.toUpperCase() == String(res).toUpperCase()) {
@@ -50,8 +52,8 @@ function regexment(text,nick) {
 			return 0;
 		}
 		return 0;
-  }
-  return 0;
+	}
+	return 0;
 }
 
 function regexyui(message) {
@@ -334,7 +336,7 @@ function yuishout(socket) {
 			if (notban) {
 				if ($('#shout_text').attr('data-type')=='shout') {
 
-					var msg = escapeHtml($('#shout_text').sceditor('instance').val());
+					var msg = $('#shout_text').sceditor('instance').val();
 
 					if (parseInt(ysbvar.ysblc) > 0) {
 						msg = msg.slice(0, parseInt(ysbvar.ysblc));
@@ -356,7 +358,7 @@ function yuishout(socket) {
 					}
 				}
 				else if ($('#shout_text').attr('data-type')=='edit') {
-					var msg = escapeHtml($('#shout_text').sceditor('instance').val());
+					var msg = $('#shout_text').sceditor('instance').val();
 
 					if (parseInt(ysbvar.ysblc) > 0) {
 						msg = msg.slice(0, parseInt(ysbvar.ysblc));
@@ -410,7 +412,7 @@ function yuishout(socket) {
 
 	function displayMsg(reqtype, message, username, colorsht, avatar,type, key, created, ckold, cur){
 		var hour = moment(created).utcOffset(parseInt(zoneset)).format(zoneformt);
-		message = regexyui(escapeHtml(revescapeHtml(message))),
+		message = regexyui(message),
 		nums = numshouts;
 		if (reqtype=='lognext' || reqtype=='logback') {
 			nums = ysbvar.mpp;
@@ -453,7 +455,8 @@ function yuishout(socket) {
 	});
 
 	function updmsg(message, key){
-		message = regexyui(escapeHtml(revescapeHtml(message)));
+		
+		message = regexyui(message);
 		setTimeout(function() {
 			if ($('.shoutarea').children().hasClass(key)) {
 				if(direction!='top') {
@@ -757,10 +760,9 @@ function yuishout(socket) {
 	($.fn.on || $.fn.live).call($(document), 'dblclick', '.msgShout', function (e) {
 		var id = $(this).attr('data-ided');
 		function edtfunc(msg, uid){
-			msg = revescapeHtml(msg);
 			if (uid == ysbvar.mybbuid || $.inArray(parseInt(ysbvar.mybbusergroup), ysbvar.yuimodgroups.split(',').map(function(modgrup){return Number(modgrup);}))!=-1) {
 				$('#shout_text').attr( {"data-type": "edit", "data-id": id} );
-				$('#shout_text').sceditor('instance').val(msg);
+				$('#shout_text').sceditor('instance').val(revescapeHtml(msg).replace(/(<([^>]+)>)/ig,""));
 				if(!$('#cancel_edit').length) {
 					$('#yuishoutbox-form').append('<button id="cancel_edit" style="margin:4px;">'+cancel_editlan+'</button><button id="del_shout" style="margin:4px;" data-delid='+id+'>'+shout_delan+'</button>');
 				}

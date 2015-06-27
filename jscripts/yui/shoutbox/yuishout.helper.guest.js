@@ -148,7 +148,7 @@ function yuishout(socket) {
 
 	function displayMsg(reqtype, message, username, colorsht, avatar,type, key, created, ckold, cur){
 		var hour = moment(created).utcOffset(parseInt(zoneset)).format(zoneformt);
-		message = regexyui(escapeHtml(revescapeHtml(message))),
+		message = regexyui(message),
 		nums = numshouts;
 		shoutgenerator(reqtype,key,colorsht,avatar,hour,username,message,type,ckold,direction,nums,cur);
 	};

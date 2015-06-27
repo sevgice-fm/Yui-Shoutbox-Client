@@ -21,7 +21,7 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-define('YSB_PLUGIN_VER', '1.0.0');
+define('YSB_PLUGIN_VER', '1.1.0');
 
 function yuishoutbox_info()
 {
@@ -920,21 +920,19 @@ function ysb_listen()
 					$name = format_name($mybb->user['username'], $mybb->user['usergroup'], $mybb->user['displaygroup']);
 					
 					if (!$settings['yuishout_lim_character']) {
-						$msg = htmlspecialchars_uni($_POST['msg']);
+						$msg = addslashes($_POST['msg']);
 					}
 					else {
-						$msg = substr(htmlspecialchars_uni($_POST['msg']), 0, $settings['yuishout_lim_character']);		
+						$msg = substr(addslashes($_POST['msg']), 0, $settings['yuishout_lim_character']);		
 					}
 					
-					if ((int)$settings['yuishout_bad_word']) {
-						$options = [
-							'allow_mycode'    => 0,
-							'allow_smilies'   => 0,
-							'allow_imgcode'   => 0,
-							'filter_badwords' => 1
-						];
-						$msg = $parser->parse_message($msg, $options);
-					}
+					$options = [
+						'allow_mycode'    => 0,
+						'allow_smilies'   => 0,
+						'allow_imgcode'   => 0,
+						'filter_badwords' => (int)$settings['yuishout_bad_word']
+					];
+					$msg = $parser->parse_message($msg, $options);
 
 					$data = array(
 						"nick" => $name,
@@ -962,21 +960,19 @@ function ysb_listen()
 			}
 
 			if (!$settings['yuishout_lim_character']) {
-				$msg = htmlspecialchars_uni($_POST['newmsg']);
+				$msg = addslashes($_POST['newmsg']);
 			}
 			else {
-				$msg = substr(htmlspecialchars_uni($_POST['newmsg']), 0, $settings['yuishout_lim_character']);		
+				$msg = substr(addslashes($_POST['newmsg']), 0, $settings['yuishout_lim_character']);		
 			}
 
-			if ((int)$settings['yuishout_bad_word']) {
-				$options = [
-					'allow_mycode'    => 0,
-					'allow_smilies'   => 0,
-					'allow_imgcode'   => 0,
-					'filter_badwords' => 1
-				];
-				$msg = $parser->parse_message($msg, $options);
-			}
+			$options = [
+				'allow_mycode'    => 0,
+				'allow_smilies'   => 0,
+				'allow_imgcode'   => 0,
+				'filter_badwords' => (int)$settings['yuishout_bad_word']
+			];
+			$msg = $parser->parse_message($msg, $options);
 
 			$data2 = array(
 				"id" => htmlspecialchars_decode($_POST['id']),
