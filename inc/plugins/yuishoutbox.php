@@ -21,7 +21,7 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-define('YSB_PLUGIN_VER', '1.1.0');
+define('YSB_PLUGIN_VER', '1.2.0');
 
 function yuishoutbox_info()
 {
@@ -920,10 +920,10 @@ function ysb_listen()
 					$name = format_name($mybb->user['username'], $mybb->user['usergroup'], $mybb->user['displaygroup']);
 					
 					if (!$settings['yuishout_lim_character']) {
-						$msg = addslashes($_POST['msg']);
+						$msg = htmlspecialchars_decode($_POST['msg']);
 					}
 					else {
-						$msg = substr(addslashes($_POST['msg']), 0, $settings['yuishout_lim_character']);		
+						$msg = substr(htmlspecialchars_decode($_POST['msg']), 0, $settings['yuishout_lim_character']);		
 					}
 					
 					$options = [
@@ -960,10 +960,10 @@ function ysb_listen()
 			}
 
 			if (!$settings['yuishout_lim_character']) {
-				$msg = addslashes($_POST['newmsg']);
+				$msg = htmlspecialchars_decode($_POST['newmsg']);
 			}
 			else {
-				$msg = substr(addslashes($_POST['newmsg']), 0, $settings['yuishout_lim_character']);		
+				$msg = substr(htmlspecialchars_decode($_POST['newmsg']), 0, $settings['yuishout_lim_character']);		
 			}
 
 			$options = [

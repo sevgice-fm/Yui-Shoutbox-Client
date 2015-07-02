@@ -691,6 +691,14 @@ function yuishout(socket) {
 	socket.on('rmvmsg', function (data) {
 		if (data) {
 			$('div.wrapShout').children('div.'+data._id+'').remove();
+			setTimeout(function() {
+				if ($('.shoutarea').children("[data-ment=yes]").length) {
+					document.title = '('+$('.shoutarea').children("[data-ment=yes]").length+') '+orgtit+'';
+				}
+				else {
+					document.title = orgtit;
+				}
+			},200);
 		}
 	});
 
