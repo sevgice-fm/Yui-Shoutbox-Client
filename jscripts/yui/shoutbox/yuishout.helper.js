@@ -256,8 +256,12 @@ function yuishout(socket) {
 	colorshout = '',
 	shoutvol = '0';
 
+	if (parseInt(numshouts)>100) {
+		numshouts = '100';
+	}	
+
 	var shoutbut = '<button id="sbut" style="margin: 2px; float: right;">'+shout_lang+'</button>';
-	$(shoutbut).appendTo('.sceditor-toolbar');
+	$(shoutbut).appendTo('.yuieditor-toolbar');
 
 	if (parseInt(actcolor)) {
 		sb_sty = JSON.parse(localStorage.getItem('sb_col_ft'));
@@ -316,8 +320,8 @@ function yuishout(socket) {
 
 	var last_check = Date.now()/1000;
 
-	$('#shout_text').sceditor('instance').bind('keypress', function(e) {
-		if(e.originalEvent.which == 13) {
+	$('#shout_text').keypress(function(e) {
+		if(e.which == 13) {
 			e.preventDefault();
 			onshout(e);
 		}
@@ -336,18 +340,18 @@ function yuishout(socket) {
 			if (notban) {
 				if ($('#shout_text').attr('data-type')=='shout') {
 
-					var msg = $('#shout_text').sceditor('instance').val();
+					var msg = $('#shout_text').val();
 
 					if (parseInt(ysbvar.ysblc) > 0) {
 						msg = msg.slice(0, parseInt(ysbvar.ysblc));
 					}
 
 					if(msg == '' || msg == null) {
-						$('#shout_text').sceditor('instance').val('').focus();
+						$('#shout_text').val('').focus();
 						return false;
 					}
 					else {
-						$('#shout_text').sceditor('instance').val('').focus();
+						$('#shout_text').val('').focus();
 						if ( /^\/me[\s]+(.*)$/.test(msg) ) {
 							emitajax('message', {msg:msg.slice(4), colorsht: colorshout, type: 'system'});
 						}
@@ -358,7 +362,7 @@ function yuishout(socket) {
 					}
 				}
 				else if ($('#shout_text').attr('data-type')=='edit') {
-					var msg = $('#shout_text').sceditor('instance').val();
+					var msg = $('#shout_text').val();
 
 					if (parseInt(ysbvar.ysblc) > 0) {
 						msg = msg.slice(0, parseInt(ysbvar.ysblc));
@@ -371,11 +375,11 @@ function yuishout(socket) {
 						setTimeout(function() {
 							$('#upd_alert').jGrowl(mes_emptylan, { life: 500 });
 						},200);
-						$('#shout_text').sceditor('instance').val('').focus();
+						$('#shout_text').val('').focus();
 						return false;
 					}
 					else {
-						$('#shout_text').sceditor('instance').val('').focus();
+						$('#shout_text').val('').focus();
 						$('#shout_text').attr("data-type", "shout");
 						$('#cancel_edit').remove();
 						$('#del_shout').remove();
@@ -386,7 +390,7 @@ function yuishout(socket) {
 				}
 			}
 			else {
-				$('#shout_text').sceditor('instance').val('').focus();
+				$('#shout_text').val('').focus();
 				if(!$('#upd_alert').length) {
 					$('<div/>', { id: 'upd_alert', class: 'top-right' }).appendTo('body');
 				}
@@ -415,7 +419,12 @@ function yuishout(socket) {
 		message = regexyui(message),
 		nums = numshouts;
 		if (reqtype=='lognext' || reqtype=='logback') {
-			nums = ysbvar.mpp;
+			if (parseInt(ysbvar.mpp)>200) {
+				nums = '200';
+			}
+			else {
+				nums = ysbvar.mpp;
+			}
 		}
 
 		shoutgenerator(reqtype,key,colorsht,avatar,hour,username,message,type,ckold,direction,nums,cur);
@@ -494,7 +503,14 @@ function yuishout(socket) {
 	});
 
 	function logfunc() {
-		socket.emit('logfpgmsg', {mpp:ysbvar.mpp});
+		numslogs = '';
+		if (parseInt(ysbvar.mpp)>200) {
+			numslogs = '200';
+		}
+		else {
+			numslogs = ysbvar.mpp;
+		}	
+		socket.emit('logfpgmsg', {mpp:numslogs});
 		socket.once('logfpgmsg', function(docs){
 			for (var i = docs.length-1; i >= 0; i--) {
 				checkMsg('lognext', docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
@@ -517,10 +533,17 @@ function yuishout(socket) {
 		}
 
 		function displayfpglogMsg(data){
+			numslogs = '';
+			if (parseInt(ysbvar.mpp)>200) {
+				numslogs = '200';
+			}
+			else {
+				numslogs = ysbvar.mpp;
+			}		
 			npostbase = data;
-			pagebase = Math.ceil(npostbase/ysbvar.mpp);
+			pagebase = Math.ceil(npostbase/numslogs);
 			npost = npostbase + pagebase;
-			page = Math.ceil(npost/ysbvar.mpp);
+			page = Math.ceil(npost/numslogs);
 			if (page>1) {
 				initpage = "1/"+page;
 			}
@@ -563,7 +586,14 @@ function yuishout(socket) {
 			$('#pagecount').attr('data-pageact', newactpage);
 			$('#pagecount').val(newpagelist);
 
-			socket.emit('logmsgnext', {id:prevpagefirstid, mpp:ysbvar.mpp});
+			numslogs = '';
+			if (parseInt(ysbvar.mpp)>200) {
+				numslogs = '200';
+			}
+			else {
+				numslogs = ysbvar.mpp;
+			}
+			socket.emit('logmsgnext', {id:prevpagefirstid, mpp:numslogs});
 			socket.once('logmsgnext', function (docs) {
 				for (var i = docs.length-1; i >= 0; i--) {
 					checkMsg('lognext', docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
@@ -596,7 +626,14 @@ function yuishout(socket) {
 			$('#pagecount').attr('data-pageact', newactpage);
 			$('#pagecount').val(newpagelist);
 
-			socket.emit('logmsgback', {id:prevpagelastid, mpp:ysbvar.mpp});
+			numslogs = '';
+			if (parseInt(ysbvar.mpp)>200) {
+				numslogs = '200';
+			}
+			else {
+				numslogs = ysbvar.mpp;
+			}
+			socket.emit('logmsgback', {id:prevpagelastid, mpp:numslogs});
 			socket.once('logmsgback', function (docs) {
 				for (var i = docs.length-1; i >= 0; i--) {
 					checkMsg('logback', docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
@@ -618,12 +655,8 @@ function yuishout(socket) {
 			$('.banlist').modal({ zIndex: 7 });
 		}
 
-		var banbut = [
-			'<a class="sceditor-button" title="'+ban_msglan+'" id="banusr">',
-				'<div style="background-image: url('+rootpath+'/images/buddy_delete.png); opacity: 1; cursor: pointer;">'+ban_msglan+'</div>',
-			'</a>'
-		];
-		$(banbut.join('')).appendTo('.sceditor-group:last');
+		banbut = '<a class="yuieditor-button" id="banusr" title="'+ban_msglan+'"><div style="background-image: url('+rootpath+'/images/buddy_delete.png); opacity: 1; cursor: pointer;">'+ban_msglan+'</div></a>';
+		$(banbut).appendTo('.yuieditor-group_shout_text:last');		
 
 		($.fn.on || $.fn.live).call($(document), 'click', '#banusr', function (e) {
 			socket.emit('getbanl', function (data) {});
@@ -645,12 +678,8 @@ function yuishout(socket) {
 			$.modal.close();
 		});
 
-		var prune = [
-			'<a class="sceditor-button" title="'+prune_msglan+'" id="prune">',
-				'<div style="background-image: url('+rootpath+'/images/invalid.png); opacity: 1; cursor: pointer;">'+prune_msglan+'</div>',
-			'</a>'
-		];
-		$(prune.join('')).appendTo('.sceditor-group:last');
+		prune = '<a class="yuieditor-button" id="prune" title="'+prune_msglan+'"><div style="background-image: url('+rootpath+'/images/invalid.png); opacity: 1; cursor: pointer;">'+prune_msglan+'</div></a>';
+		$(prune).appendTo('.yuieditor-group_shout_text:last');		
 
 		($.fn.on || $.fn.live).call($(document), 'click', '#prune', function (e) {
 			prunefunc();
@@ -681,7 +710,7 @@ function yuishout(socket) {
 		e.preventDefault();
 		var id = $(this).attr('ided');
 		emitajax('rmvmsg', {id:id});
-		$('#shout_text').sceditor('instance').val('').focus();
+		$('#shout_text').val('').focus();
 		$('#shout_text').attr("data-type", "shout");
 		$('#cancel_edit').remove();
 		$('#del_shout').remove();
@@ -704,7 +733,7 @@ function yuishout(socket) {
 
 	($.fn.on || $.fn.live).call($(document), 'click', '#del_no', function (e) {
 		e.preventDefault();
-		$('#shout_text').sceditor('instance').val('').focus();
+		$('#shout_text').val('').focus();
 		$('#shout_text').attr("data-type", "shout");
 		$('#cancel_edit').remove();
 		$('#del_shout').remove();
@@ -727,22 +756,16 @@ function yuishout(socket) {
 		$('.sound').modal({ zIndex: 7 });
 	}
 
-	var sound = [
-		'<a class="sceditor-button" title="'+sound_lan+'" id="sound">',
-			'<div style="background-image: url('+rootpath+'/images/sound.png); opacity: 1; cursor: pointer;">'+sound_lan+'</div>',
-		'</a>'
-	];
-	$(sound.join('')).appendTo('.sceditor-group:last');
+	sound = '<a class="yuieditor-button" id="sound" title="'+sound_lan+'"><div style="background-image: url('+rootpath+'/images/sound.png); opacity: 1; cursor: pointer;">'+sound_lan+'</div></a>';
+	$(sound).appendTo('.yuieditor-group_shout_text:last');
 
 	($.fn.on || $.fn.live).call($(document), 'click', '#sound', function (e) {
 		soundfunc();
 	});
 
 	if (parseInt(actcolor)) {
-		var colorpicker = [
-			'<input type="color" value="'+colorshout+'" id="font_color">'
-		];
-		$(colorpicker.join('')).appendTo('.sceditor-group:last');
+		colorpicker = '<input type="color" value="'+colorshout+'" id="font_color">';
+		$(colorpicker).appendTo('.yuieditor-group_shout_text:last');
 
 		var theInput = document.getElementById("font_color");
 		theInput.addEventListener("input", function() {
@@ -758,19 +781,15 @@ function yuishout(socket) {
 		}, false);
 	}
 
-	var log = [
-		'<a class="sceditor-button" title="'+log_msglan+'" id="log">',
-			'<div style="background-image: url('+rootpath+'/images/log.png); opacity: 1; cursor: pointer;">'+log_msglan+'</div>',
-		'</a>'
-	];
-	$(log.join('')).appendTo('.sceditor-group:last');
+	log = '<a class="yuieditor-button" id="log" title="'+log_msglan+'"><div style="background-image: url('+rootpath+'/images/log.png); opacity: 1; cursor: pointer;">'+log_msglan+'</div></a>';
+	$(log).appendTo('.yuieditor-group_shout_text:last');
 
 	($.fn.on || $.fn.live).call($(document), 'dblclick', '.msgShout', function (e) {
 		var id = $(this).attr('data-ided');
 		function edtfunc(msg, uid){
 			if (uid == ysbvar.mybbuid || $.inArray(parseInt(ysbvar.mybbusergroup), ysbvar.yuimodgroups.split(',').map(function(modgrup){return Number(modgrup);}))!=-1) {
 				$('#shout_text').attr( {"data-type": "edit", "data-id": id} );
-				$('#shout_text').sceditor('instance').val(revescapeHtml(msg).replace(/(<([^>]+)>)/ig,""));
+				$('#shout_text').val(revescapeHtml(msg).replace(/(<([^>]+)>)/ig,""));
 				if(!$('#cancel_edit').length) {
 					$('#yuishoutbox-form').append('<button id="cancel_edit" style="margin:4px;">'+cancel_editlan+'</button><button id="del_shout" style="margin:4px;" data-delid='+id+'>'+shout_delan+'</button>');
 				}
@@ -792,145 +811,9 @@ function yuishout(socket) {
 
 	($.fn.on || $.fn.live).call($(document), 'click', '#cancel_edit', function (e) {
 		e.preventDefault();
-		$('#shout_text').sceditor('instance').val('').focus();
+		$('#shout_text').val('').focus();
 		$('#shout_text').attr("data-type", "shout");
 		$('#cancel_edit').remove();
 		$('#del_shout').remove();
 	});
 }
-
-$(document).ready(function($) {
-	'use strict';
-
-	var $document = $(document);
-
-	/***********************
-	 * Add custom MyBB CSS *
-	 ***********************/
-	$('<style type="text/css">' +
-		'.sceditor-dropdown { text-align: ' + ($('body').css('direction') === 'rtl' ? 'right' :'left') + '; }' +
-	'</style>').appendTo('body');
-
-	/***********************
-	 * Add Spoiler command *
-	 ***********************/
-	$.sceditor.plugins.bbcode.bbcode.set("spoiler", {
-		format: '[spoiler]{0}[/spoiler]',
-		html: '[spoiler]{0}[/spoiler]'
-	});
-
-	$.sceditor.command.set("spoiler", {
-		_dropDown: function (editor, caller, html) {
-			var $content;
-
-			$content = $(
-				'<div>' +
-					'<label for="des">' + editor._('Description (optional):') + '</label> ' +
-					'<input type="text" id="des" />' +
-				'</div>' +
-				'<div><input type="button" class="button" value="' + editor._('Insert') + '" /></div>'
-			);
-
-			$content.find('.button').click(function (e) {
-				var	   description = $content.find('#des').val(),
-					descriptionAttr = '',
-					before = '[spoiler]',
-					end = '[/spoiler]';
-
-				if (description) {
-				   descriptionAttr = '=' + description + '';
-				   before = '[spoiler'+ descriptionAttr +']';
-				}
-
-				if (html) {
-					before = before + html + end;
-					end	   = null;
-				}
-
-				editor.insert(before, end);
-				editor.closeDropDown(true);
-				e.preventDefault();
-			});
-
-			editor.createDropDown(caller, 'insertspoiler', $content);
-		},
-		exec: function () {
-			this.wysiwygEditorInsertHtml('[spoiler]', '[/spoiler]');
-		},
-		txtExec: ['[spoiler]', '[/spoiler]'],
-		tooltip: ''+add_spolang+''
-	});
-
-	/*************
-	 * Imgur Tag *
-	 *************/
-	$.sceditor.command.set("imgur", {
-		exec: function ()
-		{
-			document.querySelector('textarea').insertAdjacentHTML( 'afterEnd', '<input class="imgur" style="visibility:hidden;position:absolute;top:0;" type="file" onchange="upload(this.files[0])" accept="image/*">' );
-			document.querySelector('input.imgur').click();
-		},
-		txtExec: function()
-		{
-			document.querySelector('textarea').insertAdjacentHTML( 'afterEnd', '<input class="imgur" style="visibility:hidden;position:absolute;top:0;" type="file" onchange="upload(this.files[0])" accept="image/*">' );
-			document.querySelector('input.imgur').click();
-		},
-		tooltip: ''+upimgurlang+''
-	});
-
-	$.sceditor.plugins.bbcode.bbcode.set("imgur", {
-		tags: {
-			pre: null
-		},
-		format: function ()
-		{
-			document.querySelector('textarea').insertAdjacentHTML( 'afterEnd', '<input class="imgur" style="visibility:hidden;position:absolute;top:0;" type="file" onchange="upload(this.files[0])" accept="image/*">' );
-			document.querySelector('input.imgur').click();
-		},
-		html: function ()
-		{
-			document.querySelector('textarea').insertAdjacentHTML( 'afterEnd', '<input class="imgur" style="visibility:hidden;position:absolute;top:0;" type="file" onchange="upload(this.files[0])" accept="image/*">' );
-			document.querySelector('input.imgur').click();
-		}
-	});
-
-	/*************************************
-	 * Remove last bits of table support *
-	 *************************************/
-	$.sceditor.command.remove('table');
-	$.sceditor.plugins.bbcode.bbcode.remove('table')
-					.remove('tr')
-					.remove('th')
-					.remove('td');
-});
-
-/*****************************
- * Add imgur upload function *
- *****************************/
-function upload(file) {
-
-	/* Is the file an image? */
-	if (!file || !file.type.match(/image.*/)) return;
-
-	/* It is! */
-	document.body.className = "uploading";
-	var d = document.querySelector(".sceditor-button-imgur div");
-	d.className = d.className + " imgurup";
-
-	/* Lets build a FormData object*/
-	var fd = new FormData(); // I wrote about it: https://hacks.mozilla.org/2011/01/how-to-develop-a-html5-image-uploader/
-	fd.append("image", file); // Append the file
-	var xhr = new XMLHttpRequest(); // Create the XHR (Cross-Domain XHR FTW!!!) Thank you sooooo much imgur.com
-	xhr.open("POST", "https://api.imgur.com/3/image.json"); // Boooom!
-	xhr.onload = function() {
-		var code = JSON.parse(xhr.responseText).data.link;
-		$('#shout_text').data('sceditor').insert(code);
-		var d = document.querySelector(".sceditor-button-imgur div.imgurup");
-		d.className = d.className - " imgurup";
-		document.querySelector('input.imgur').remove();
-	}
-	// Ok, I don't handle the errors. An exercice for the reader.
-	xhr.setRequestHeader('Authorization', 'Client-ID '+imgurapi+'');
-	/* And now, we send the formdata */
-	xhr.send(fd);
-};

@@ -144,6 +144,10 @@ function yuishout_connect() {
 
 function yuishout(socket) {
 
+	if (parseInt(numshouts)>100) {
+		numshouts = '100';
+	}
+
 	socket.emit('getoldmsg', {ns:numshouts});
 
 	function displayMsg(reqtype, message, username, colorsht, avatar,type, key, created, ckold, cur){

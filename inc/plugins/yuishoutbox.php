@@ -21,7 +21,7 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-define('YSB_PLUGIN_VER', '1.2.0');
+define('YSB_PLUGIN_VER', '2.0.0');
 
 function yuishoutbox_info()
 {
@@ -237,12 +237,21 @@ function yuishoutbox_install()
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
+		'name'		=> 'yuishout_mention',
+		'title'		=> $lang->yuishoutbox_mention_title,
+		'description'	=> $lang->yuishoutbox_mention_desc,
+		'optionscode'	=> 'onoff',
+		'value'		=> '1',
+		'disporder'	=> 21,
+		'gid'		=> $groupid
+	);
+	$yuishout_setting[] = array(
 		'name' => 'yuishout_ment_style',
 		'title' => $lang->yuishoutbox_mentstyle_title,
 		'description' => $lang->yuishoutbox_mentstyle_desc,
 		'optionscode' => 'text',
 		'value' => '5px solid #cd0e0a',
-		'disporder' => 21,
+		'disporder' => 22,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -251,7 +260,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_zone_desc,
 		'optionscode' => 'text',
 		'value' => '-3',
-		'disporder' => 22,
+		'disporder' => 23,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -261,7 +270,7 @@ function yuishoutbox_install()
 		'optionscode' => 'radio
 '.$lang->yuishoutbox_shoutstart_opt.'',
 		'value' => 'bottom',
-		'disporder' => 23,
+		'disporder' => 24,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -270,7 +279,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_limcharact_desc,
 		'optionscode' => 'numeric',
 		'value' => 0,
-		'disporder' => 24,
+		'disporder' => 25,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -279,7 +288,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_aavatar_desc,
 		'optionscode' => 'yesno',
 		'value' => 1,
-		'disporder' => 25,
+		'disporder' => 26,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -288,7 +297,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_acolor_desc,
 		'optionscode' => 'yesno',
 		'value' => 1,
-		'disporder' => 26,
+		'disporder' => 27,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -297,7 +306,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_destindx_desc,
 		'optionscode' => 'yesno',
 		'value' => 0,
-		'disporder' => 27,
+		'disporder' => 28,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -306,7 +315,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_actport_desc,
 		'optionscode' => 'yesno',
 		'value' => 0,
-		'disporder' => 28,
+		'disporder' => 29,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -315,7 +324,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_banusr_desc,
 		'optionscode' => 'textarea',
 		'value' => '',
-		'disporder' => 29,
+		'disporder' => 30,
 		'gid'		=> $groupid
 	);
 
@@ -330,37 +339,13 @@ function yuishoutbox_uninstall()
 	global $db;
 
 	//Delete Settings
-	$db->write_query("DELETE FROM ".TABLE_PREFIX."settings WHERE name IN(
-		'yuishout_online',
-		'yuishout_height',
-		'yuishout_num_shouts',
-		'yuishout_grups_acc',
-		'yuishout_mod_grups',
-		'yuishout_guest',
-		'yuishout_title',
-		'yuishout_server',
-		'yuishout_socketio',
-		'yuishout_server_username',
-		'yuishout_server_password',
-		'yuishout_imgurapi',
-		'yuishout_dataf',
-		'yuishout_antiflood',
-		'yuishout_bad_word'
-		'yuishout_newpost',
-		'yuishout_newthread',
-		'yuishout_folder_acc',
-		'yuishout_newpt_style',
-		'yuishout_newpt_color',
-		'yuishout_ment_style',
-		'yuishout_zone',
-		'yuishout_shouts_start',
-		'yuishout_lim_character',
-		'yuishout_act_avatar',
-		'yuishout_act_color',
-		'yuishout_des_index',
-		'yuishout_act_port',
-		'yuishout_ban_usr'
-	)");
+	//Delete Settings
+	$groupid = $db->fetch_field(
+		$db->simple_select('settinggroups', 'gid', "name='yuishoutbox'"),
+		'gid'
+    );
+
+	$db->delete_query('settings', 'gid=' . $groupid);
 
 	$db->delete_query("settinggroups", "name = 'yuishoutbox'");
 	rebuild_settings();
@@ -388,12 +373,23 @@ function yuishoutbox_activate()
 <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css\">
 <script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js\"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js'></script>
-<link rel=\"stylesheet\" href=\"{\$mybb->asset_url}/jscripts/sceditor/editor_themes/{\$theme['editortheme']}\" type=\"text/css\" media=\"all\" />
-<link rel=\"stylesheet\" href=\"{\$mybb->asset_url}/jscripts/sceditor/editor_themes/ysb.css\" type=\"text/css\" media=\"all\" />
-<script type=\"text/javascript\" src=\"{\$mybb->asset_url}/jscripts/sceditor/jquery.sceditor.bbcode.min.js?ver=".YSB_PLUGIN_VER."\"></script>
+<link rel=\"stylesheet\" href=\"{\$mybb->asset_url}/jscripts/yui/shoutbox/editor.css?ver=".YSB_PLUGIN_VER."\" type=\"text/css\" media=\"all\" />
 <script type=\"text/javascript\">
 <!--
-	var ysbvar = {mybbuid:'{\$mybb->user['uid']}', mybbusername:'{\$ysbusrname}', mybbusergroup:'{\$mybb->user['usergroup']}', yuimodgroups:'{\$mybb->settings['yuishout_mod_grups']}', ysblc:'{\$mybb->settings['yuishout_lim_character']}', floodtime:'{\$mybb->settings['yuishout_antiflood']}', mpp: '{\$mybb->settings['yuishout_lognum_shouts']}'},
+	var emoticons = {
+		dropdown: {
+			{\$dropdownsmilies}
+		},
+		more: {
+			{\$moresmilies}
+		}
+	},
+	yui_smilies = {
+		{\$smilies_json}
+	},
+	iclid = '{\$mybb->settings['yuishout_imgurapi']}',
+	maxnamelength = '{\$mybb->settings['maxnamelength']}',
+	ysbvar = {mybbuid:'{\$mybb->user['uid']}', mybbusername:'{\$ysbusrname}', mybbusergroup:'{\$mybb->user['usergroup']}', yuimodgroups:'{\$mybb->settings['yuishout_mod_grups']}', ysblc:'{\$mybb->settings['yuishout_lim_character']}', floodtime:'{\$mybb->settings['yuishout_antiflood']}', mpp: '{\$mybb->settings['yuishout_lognum_shouts']}'},
 	shout_lang = '{\$lang->yuishoutbox_shout}',
 	add_spolang = '{\$lang->yuishoutbox_add_spoiler}',
 	spo_lan = '{\$lang->yuishoutbox_spoiler}',
@@ -443,7 +439,8 @@ function yuishoutbox_activate()
 	actavat = '{\$mybb->settings['yuishout_act_avatar']}',
 	actcolor = '{\$mybb->settings['yuishout_act_color']}',
 	ysbaddress = '{\$mybb->settings['yuishout_server']}',
-	socketaddress = '{\$mybb->settings['yuishout_socketio']}';
+	socketaddress = '{\$mybb->settings['yuishout_socketio']}',
+	{\$editor_language}
 	Object.defineProperty(ysbvar, 'mybbuid', { writable: false });
 	Object.defineProperty(ysbvar, 'mybbusername', { writable: false });
 	Object.defineProperty(ysbvar, 'mpp', { writable: false });
@@ -453,45 +450,14 @@ function yuishoutbox_activate()
 	Object.defineProperty(ysbvar, 'floodtime', { writable: false });
 // -->
 </script>
+<script type=\"text/javascript\" src=\"{\$mybb->asset_url}/jscripts/yui/shoutbox/yui.editor.js?ver=".YSB_PLUGIN_VER."\"></script>
+<script type=\"text/javascript\" src=\"{\$mybb->asset_url}/jscripts/yui/shoutbox/yui.editor.helper.js?ver=".YSB_PLUGIN_VER."\"></script>
+{\$yui_mention}
 <script type=\"text/javascript\" src=\"{\$mybb->asset_url}/jscripts/yui/shoutbox/yuishout.helper.js?ver=".YSB_PLUGIN_VER."\"></script>
 <script type=\"text/javascript\">
-yui_smilies = {
-	{\$smilies_json}
-},
-opt_editor = {
-	plugins: \"bbcode\",
-	style: \"{\$mybb->asset_url}/jscripts/sceditor/textarea_styles/jquery.sceditor.{\$theme['editortheme']}\",
-	rtl: {\$lang->settings['rtl']},
-	locale: \"mybblang\",
-	enablePasteFiltering: true,
-	emoticonsEnabled: {\$emoticons_enabled},
-	emoticons: {
-		// Emoticons to be included in the dropdown
-		dropdown: {
-			{\$dropdownsmilies}
-		},
-		// Emoticons to be included in the more section
-		more: {
-			{\$moresmilies}
-		},
-		// Emoticons that are not shown in the dropdown but will still be converted. Can be used for things like aliases
-		hidden: {
-			{\$hiddensmilies}
-		}
-	},
-	emoticonsCompat: true,
-	toolbar: \"spoiler,emoticon,imgur\",
-};
-{\$editor_language}
-
 \$(document).ready(function() {
-	\$('#shout_text').height('70px');
-	\$('#shout_text').sceditor(opt_editor);
-	\$('#shout_text').next().css(\"z-index\", \"1\");
-	\$('#shout_text').sceditor('instance').sourceMode(true);
 	yuishout_connect();
 });
-
 </script>";
 
 	$new_template_global['ysb_template'] = "<table border=\"0\" cellspacing=\"0\" cellpadding=\"4\" class=\"tborder tShout\">
@@ -509,7 +475,7 @@ opt_editor = {
 				<div class=\"contentShout\">
 					<div class=\"shoutarea wrapShout\" style=\"height:{\$mybb->settings['yuishout_height']}px;\"></div>
 					<form id=\"yuishoutbox-form\">
-						<input type=\"text\" name=\"shout_text\" class=\"editorShout\" id=\"shout_text\" data-type=\"shout\" autocomplete=\"off\">{\$codebutyui}
+						<textarea type=\"text\" name=\"shout_text\" class=\"editorShout\" id=\"shout_text\" data-type=\"shout\" autocomplete=\"off\"></textarea>{\$codebutyui}
 					</form>
 				</div>
 			</td>
@@ -693,7 +659,7 @@ function yui_bbcode_func($smilies = true)
 		"editor_php" => "PHP",
 		"editor_maximize" => "Maximize"
 	);
-	$editor_language = "(function ($) {\n$.sceditor.locale[\"mybblang\"] = {\n";
+	$editor_language = "yuivar = {\n";
 
 	$editor_languages_count = count($editor_lang_strings);
 	$i = 0;
@@ -712,7 +678,7 @@ function yui_bbcode_func($smilies = true)
 		$editor_language .= "\n";
 	}
 
-	$editor_language .= "}})(jQuery);";
+	$editor_language .= "};";
 
 	if(defined("IN_ADMINCP"))
 	{
@@ -785,6 +751,15 @@ function yui_bbcode_func($smilies = true)
 				}
 			}
 		}
+
+		if($mybb->settings['yuishout_mention'] == 1)
+		{
+			$yui_mention = "<link rel=\"stylesheet\" href=\"".$mybb->asset_url."/jscripts/yui/shoutbox/jquery.atwho.min.css?ver=".YSB_PLUGIN_VER."\" type=\"text/css\" media=\"all\" />
+<script type=\"text/javascript\" src=\"".$mybb->asset_url."/jscripts/yui/shoutbox/jquery.caret.min.js?ver=".YSB_PLUGIN_VER."\"></script>
+<script type=\"text/javascript\" src=\"".$mybb->asset_url."/jscripts/yui/shoutbox/jquery.atwho.min.js?ver=".YSB_PLUGIN_VER."\"></script>
+<script type=\"text/javascript\" src=\"".$mybb->asset_url."/jscripts/yui/shoutbox/yui.mention.js?ver=".YSB_PLUGIN_VER."\"></script>";
+		}
+
 		$ysbusrname = addslashes($mybb->user['username']);
 		eval("\$yuibbcode = \"".$templates->get("codebutyui")."\";");
 	}
