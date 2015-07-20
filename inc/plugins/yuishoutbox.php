@@ -21,7 +21,7 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-define('YSB_PLUGIN_VER', '2.0.0');
+define('YSB_PLUGIN_VER', '2.3.0');
 
 function yuishoutbox_info()
 {
@@ -301,12 +301,48 @@ function yuishoutbox_install()
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
+		'name' => 'yuishout_act_bold',
+		'title' => $lang->yuishoutbox_acbold_title,
+		'description' => $lang->yuishoutbox_acbold_desc,
+		'optionscode' => 'yesno',
+		'value' => 1,
+		'disporder' => 28,
+		'gid'		=> $groupid
+	);
+	$yuishout_setting[] = array(
+		'name' => 'yuishout_styles_font',
+		'title' => $lang->yuishoutbox_stfont_title,
+		'description' => $lang->yuishoutbox_stfont_desc,
+		'optionscode' => 'textarea',
+		'value' => 'Arial,Arial Black,Comic Sans MS,Courier New,Georgia,Impact,Sans-serif,Serif,Times New Roman,Trebuchet MS,Verdana',
+		'disporder' => 29,
+		'gid'		=> $groupid
+	);
+	$yuishout_setting[] = array(
+		'name' => 'yuishout_styles_size',
+		'title' => $lang->yuishoutbox_sizfont_title,
+		'description' => $lang->yuishoutbox_sizfont_desc,
+		'optionscode' => 'textarea',
+		'value' => '11,12,13',
+		'disporder' => 30,
+		'gid'		=> $groupid
+	);
+	$yuishout_setting[] = array(
+		'name' => 'yuishout_deststyl_select',
+		'title' => $lang->yuishoutbox_deststyl_title,
+		'description' => $lang->yuishoutbox_deststyl_desc,
+		'optionscode' => 'yesno',
+		'value' => 0,
+		'disporder' => 31,
+		'gid'		=> $groupid
+	);
+	$yuishout_setting[] = array(
 		'name' => 'yuishout_des_index',
 		'title' => $lang->yuishoutbox_destindx_title,
 		'description' => $lang->yuishoutbox_destindx_desc,
 		'optionscode' => 'yesno',
 		'value' => 0,
-		'disporder' => 28,
+		'disporder' => 32,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -315,7 +351,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_actport_desc,
 		'optionscode' => 'yesno',
 		'value' => 0,
-		'disporder' => 29,
+		'disporder' => 33,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -324,7 +360,16 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_banusr_desc,
 		'optionscode' => 'textarea',
 		'value' => '',
-		'disporder' => 30,
+		'disporder' => 34,
+		'gid'		=> $groupid
+	);
+	$yuishout_setting[] = array(
+		'name' => 'yuishout_use_fsockopen',
+		'title' => $lang->yuishoutbox_usefsockopen_title,
+		'description' => $lang->yuishoutbox_usefsockopen_desc,
+		'optionscode' => 'yesno',
+		'value' => 0,
+		'disporder' => 35,
 		'gid'		=> $groupid
 	);
 
@@ -387,8 +432,11 @@ function yuishoutbox_activate()
 	yui_smilies = {
 		{\$smilies_json}
 	},
+	fontype = fontsize = fontbold = '',
 	iclid = '{\$mybb->settings['yuishout_imgurapi']}',
 	maxnamelength = '{\$mybb->settings['maxnamelength']}',
+	ysbfontsize = '{\$mybb->settings['yuishout_styles_size']}',
+	ysbfontype = '{\$mybb->settings['yuishout_styles_font']}',
 	ysbvar = {mybbuid:'{\$mybb->user['uid']}', mybbusername:'{\$ysbusrname}', mybbusergroup:'{\$mybb->user['usergroup']}', yuimodgroups:'{\$mybb->settings['yuishout_mod_grups']}', ysblc:'{\$mybb->settings['yuishout_lim_character']}', floodtime:'{\$mybb->settings['yuishout_antiflood']}', mpp: '{\$mybb->settings['yuishout_lognum_shouts']}'},
 	shout_lang = '{\$lang->yuishoutbox_shout}',
 	add_spolang = '{\$lang->yuishoutbox_add_spoiler}',
@@ -438,6 +486,8 @@ function yuishoutbox_activate()
 	ment_borderstyle = '{\$mybb->settings['yuishout_ment_style']}',
 	actavat = '{\$mybb->settings['yuishout_act_avatar']}',
 	actcolor = '{\$mybb->settings['yuishout_act_color']}',
+	actbold = '{\$mybb->settings['yuishout_act_bold']}',
+	destyl = '{\$mybb->settings['yuishout_deststyl_select']}',
 	ysbaddress = '{\$mybb->settings['yuishout_server']}',
 	socketaddress = '{\$mybb->settings['yuishout_socketio']}',
 	{\$editor_language}
@@ -508,6 +558,9 @@ function yuishoutbox_activate()
 <script type=\"text/javascript\">
 <!--
 	var ysbvar = {mybbuid:'{\$mybb->user['uid']}', mybbusername:'{\$lang->guest}', mybbavatar:'{\$mybb->user['avatar']}', mybbusergroup:'{\$mybb->user['usergroup']}', Yuimodgroups:'{\$mybb->settings['yuishout_mod_grups']}', ysblc:'{\$mybb->settings['yuishout_lim_character']}', floodtime:'{\$mybb->settings['yuishout_antiflood']}'},
+	fontype = fontsize = fontbold = '',
+	ysbfontsize = '{\$mybb->settings['yuishout_styles_size']}',
+	ysbfontype = '{\$mybb->settings['yuishout_styles_font']}',
 	spo_lan = '{\$lang->yuishoutbox_spoiler}',
 	show_lan = '{\$lang->yuishoutbox_show}',
 	hide_lan = '{\$lang->yuishoutbox_hide}',
@@ -526,6 +579,8 @@ function yuishoutbox_activate()
 	imgurapi = '{\$mybb->settings['yuishout_imgurapi']}',
 	actavat = '{\$mybb->settings['yuishout_act_avatar']}',
 	actcolor = '{\$mybb->settings['yuishout_act_color']}',
+	actbold = '{\$mybb->settings['yuishout_act_bold']}',
+	destyl = '{\$mybb->settings['yuishout_deststyl_select']}',
 	socketaddress = '{\$mybb->settings['yuishout_socketio']}';
 // -->
 </script>
@@ -794,19 +849,52 @@ function yuishout() {
 function sendPostDataYSB($type, $data) {
 
 	global $mybb, $settings;
-
+	
 	$baseurl = $settings['yuishout_server'];
-	$emiturl = $baseurl."/".$type."";
-	$ch = curl_init($emiturl);
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Origin: http://'.$_SERVER['HTTP_HOST'].'', 'Content-Type: application/json'));
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-	curl_setopt($ch, CURLOPT_USERPWD, "".$settings['yuishout_server_username'].":".$settings['yuishout_server_password']."");
-	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-	$result = curl_exec($ch);
-	curl_close($ch);
-	return $result;
+	if (parse_url($baseurl, PHP_URL_SCHEME)!='https') {
+		$baseurl = "https://".$settings['yuishout_server']."";
+	}
+	if ((int)$settings['yuishout_use_fsockopen']==1) {
+		$data = json_encode($data);
+		$hosturl = parse_url($baseurl, PHP_URL_HOST);
+		$path = "/".$type."";
+		$fp = fsockopen('ssl://'. $hosturl, 443, $errno, $errstr, 30);
+		$http = "POST $path HTTP/1.1\r\n";
+		$http .= "Host: $hosturl\r\n";
+		$http .= "Content-Type: application/json\r\n";
+		$http .= "Authorization: Basic " . base64_encode(''.$settings['yuishout_server_username'].':'.$settings['yuishout_server_password'].'') . "\r\n";
+		$http .= "Content-length: " . strlen($data) . "\r\n";
+		$http .= "Connection: close\r\n\r\n";
+		$http .= $data;
+		fwrite($fp, $http);
+		$lineBreak = 0;
+		while (!feof($fp))
+		{
+			if($lineBreak == 0)
+			while(trim(fgets($fp, 2014)) != "")
+			{
+				$lineBreak = 1;
+				continue;
+			}
+
+			$line = fgets($fp, 1024);
+			$response .= "$line";
+		}
+		return $response;
+	}
+	else {
+		$emiturl = $baseurl."/".$type."";
+		$ch = curl_init($emiturl);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Origin: http://'.$_SERVER['HTTP_HOST'].'', 'Content-Type: application/json'));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		curl_setopt($ch, CURLOPT_USERPWD, "".$settings['yuishout_server_username'].":".$settings['yuishout_server_password']."");
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+		$result = curl_exec($ch);
+		curl_close($ch);
+		return $result;
+	}
 }
 
 if ($settings['yuishout_online'] && $settings['yuishout_newthread']) {
@@ -830,6 +918,9 @@ function ysb_newthread()
 			"msg" => $linklang,
 			"uid" => $mybb->user['uid'],
 			"colorsht" => $mybb->settings['yuishout_newpt_color'],
+			"bold" => "NaN",
+			"font" => "NaN",
+			"size" => "NaN",			
 			"avatar" => $mybb->user['avatar'],
 			"type" => "system", 
 			"fltime" => 0
@@ -859,6 +950,9 @@ function ysb_newpost()
 			"msg" => $linklang,
 			"uid" => $mybb->user['uid'],
 			"colorsht" => $mybb->settings['yuishout_newpt_color'],
+			"bold" => "NaN",
+			"font" => "NaN",
+			"size" => "NaN",
 			"avatar" => $mybb->user['avatar'],
 			"type" => "system", 
 			"fltime" => 0
@@ -913,6 +1007,9 @@ function ysb_listen()
 						"nick" => $name,
 						"uid" => $mybb->user['uid'],
 						"colorsht" => htmlspecialchars_decode($_POST['colorsht']),
+						"bold" => htmlspecialchars_decode($_POST['bold']),
+						"font" => htmlspecialchars_decode($_POST['font']),
+						"size" => htmlspecialchars_decode($_POST['size']),
 						"avatar" => htmlspecialchars_decode($mybb->user['avatar']),
 						"msg" => $msg,
 						"type" => htmlspecialchars_decode($_POST['type']), 

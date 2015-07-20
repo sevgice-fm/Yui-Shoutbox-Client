@@ -117,8 +117,8 @@ function autocleaner(area,count,numshouts,direction) {
 	},200);
 }
 
-function shoutgenerator(reqtype,key,colorsht,avatar,hour,username,message,type,ckold,direction,numshouts,cur) {
-	var preapp = area = scrollarea = count = usravatar = shoutcolor = '';
+function shoutgenerator(reqtype,key,colorsht,font,size,bold,avatar,hour,username,message,type,ckold,direction,numshouts,cur) {
+	var preapp = area = scrollarea = count = usravatar = shoutstyle = '';
 	if(direction=='top'){
 		preapp = 'prepend';
 		if (reqtype == 'logback') {
@@ -152,15 +152,34 @@ function shoutgenerator(reqtype,key,colorsht,avatar,hour,username,message,type,c
 	if (parseInt(actcolor)) {
 		if (colorsht) {
 			if (/(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(colorsht)) {
-				shoutcolor = 'style="color:'+colorsht+'"';
+				shoutstyle += 'color:'+colorsht+';';
+			}
+		}
+	}
+	if (parseInt(actbold)) {
+		if (parseInt(bold)===1) {
+			shoutstyle += 'font-weight:bold;';
+		}
+	}
+	if (!parseInt(destyl)) {
+		if (font.trim()) {
+			font_rls = ysbfontype.split(',');
+			if (typeof font_rls[parseInt(font)] !== 'undefined') {
+				shoutstyle += "font-family:"+font_rls[parseInt(font)].trim()+";";
+			}
+		}
+		if (size.trim()) {
+			size_rls = ysbfontsize.split(',');
+			if (typeof size_rls[parseInt(size)] !== 'undefined') {
+				shoutstyle += 'font-size:'+size_rls[parseInt(size)].trim()+'px;';
 			}
 		}
 	}
 	if(type == 'shout') {
-		$(""+area+"")[preapp]("<div class='msgShout "+count+" "+escapeHtml(key)+"' data-ided="+escapeHtml(key)+">"+usravatar+"<span class='time_msgShout'><span>[</span>"+hour+"<span>]</span></span><span class='username_msgShout'>"+username+"</span>:<span class='content_msgShout' "+shoutcolor+">"+message+"</span></div>");
+		$(""+area+"")[preapp]("<div class='msgShout "+count+" "+escapeHtml(key)+"' data-ided="+escapeHtml(key)+">"+usravatar+"<span class='time_msgShout'><span>[</span>"+hour+"<span>]</span></span><span class='username_msgShout'>"+username+"</span>:<span class='content_msgShout' style='"+shoutstyle+"'>"+message+"</span></div>");
 	}
 	if(type == 'system') {
-		$(""+area+"")[preapp]("<div class='msgShout "+count+" "+escapeHtml(key)+"' data-ided="+escapeHtml(key)+">"+usravatar+"*<span class='username_msgShout'>"+username+"</span><span class='content_msgShout' "+shoutcolor+">"+message+"</span>*</div>");
+		$(""+area+"")[preapp]("<div class='msgShout "+count+" "+escapeHtml(key)+"' data-ided="+escapeHtml(key)+">"+usravatar+"*<span class='username_msgShout'>"+username+"</span><span class='content_msgShout' style='"+shoutstyle+"'>"+message+"</span>*</div>");
 	}
 	if(cur==0) {
 		if (reqtype == 'lognext' || reqtype == 'logback') {
@@ -272,6 +291,21 @@ function yuishout(socket) {
 		}
 	}
 
+	if (!parseInt(destyl)) {
+		sb_sty = JSON.parse(localStorage.getItem('sb_col_ft'));
+		if (sb_sty) {
+			fontype = sb_sty['font'];
+			fontsize = sb_sty['size'];
+		}
+	}
+
+	if (parseInt(actbold)) {
+		sb_sty = JSON.parse(localStorage.getItem('sb_col_ft'));
+		if (sb_sty) {
+			fontbold = sb_sty['bold'];
+		}
+	}	
+
 	sb_sty = JSON.parse(localStorage.getItem('sb_col_ft'));
 	if (sb_sty) {
 		shoutvol = sb_sty['sound'];
@@ -353,10 +387,10 @@ function yuishout(socket) {
 					else {
 						$('#shout_text').val('').focus();
 						if ( /^\/me[\s]+(.*)$/.test(msg) ) {
-							emitajax('message', {msg:msg.slice(4), colorsht: colorshout, type: 'system'});
+							emitajax('message', {msg:msg.slice(4), colorsht: colorshout, font: fontype, size: fontsize, bold: fontbold, type: 'system'});
 						}
 						else {
-							emitajax('message', {msg:msg, colorsht: colorshout, type: 'shout'});
+							emitajax('message', {msg:msg, colorsht: colorshout, font: fontype, size: fontsize, bold: fontbold, type: 'shout'});
 						}
 						return false;
 					}
@@ -414,7 +448,7 @@ function yuishout(socket) {
 		}
 	}
 
-	function displayMsg(reqtype, message, username, colorsht, avatar,type, key, created, ckold, cur){
+	function displayMsg(reqtype, message, username, colorsht, font, size, bold, avatar,type, key, created, ckold, cur){
 		var hour = moment(created).utcOffset(parseInt(zoneset)).format(zoneformt);
 		message = regexyui(message),
 		nums = numshouts;
@@ -427,7 +461,7 @@ function yuishout(socket) {
 			}
 		}
 
-		shoutgenerator(reqtype,key,colorsht,avatar,hour,username,message,type,ckold,direction,nums,cur);
+		shoutgenerator(reqtype,key,colorsht,font,size,bold,avatar,hour,username,message,type,ckold,direction,nums,cur);
 		if (regexment(message,ysbvar.mybbusername)) {
 			$("div."+key+"").css("border-left",ment_borderstyle).attr( "data-ment", "yes" );
 			setTimeout(function() {
@@ -438,19 +472,19 @@ function yuishout(socket) {
 		}
 	};
 
-	function checkMsg(req, msg, nick, colorsht, avatar, type, _id, created, ckold, cur) {
+	function checkMsg(req, msg, nick, colorsht, font, size, bold, avatar, type, _id, created, ckold, cur) {
 		var mtype = 'shout';
 
 		if (req=='lognext' || req=='logback') {
 			mtype = req;
 		}
-		displayMsg(mtype, msg, nick, colorsht, avatar, type, _id, created, ckold, cur);
+		displayMsg(mtype, msg, nick, colorsht, font, size, bold, avatar, type, _id, created, ckold, cur);
 	};
 
 	socket.once('load old msgs', function(docs){
 		if ($("#auto_lod").length) { $("#auto_lod .jGrowl-notification:last-child").remove(); }
 		for (var i = docs.length-1; i >= 0; i--) {
-			checkMsg("msg", docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
+			checkMsg("msg", docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].font, docs[i].size, docs[i].bold, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
 		}
 	});
 
@@ -460,7 +494,7 @@ function yuishout(socket) {
 			sound.volume = parseFloat(shoutvol);
 			sound.play();
 		}
-		checkMsg("msg", data.msg, data.nick, data.colorsht, data.avatar, data.type, data._id, data.created, 'new', 0);
+		checkMsg("msg", data.msg, data.nick, data.colorsht, data.font, data.size, data.bold, data.avatar, data.type, data._id, data.created, 'new', 0);
 	});
 
 	function updmsg(message, key){
@@ -513,7 +547,7 @@ function yuishout(socket) {
 		socket.emit('logfpgmsg', {mpp:numslogs});
 		socket.once('logfpgmsg', function(docs){
 			for (var i = docs.length-1; i >= 0; i--) {
-				checkMsg('lognext', docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
+				checkMsg('lognext', docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].font, docs[i].size, docs[i].bold, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
 			}
 		});
 	}
@@ -596,7 +630,7 @@ function yuishout(socket) {
 			socket.emit('logmsgnext', {id:prevpagefirstid, mpp:numslogs});
 			socket.once('logmsgnext', function (docs) {
 				for (var i = docs.length-1; i >= 0; i--) {
-					checkMsg('lognext', docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
+					checkMsg('lognext', docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].font, docs[i].size, docs[i].bold, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
 				}
 			});
 		}
@@ -636,7 +670,7 @@ function yuishout(socket) {
 			socket.emit('logmsgback', {id:prevpagelastid, mpp:numslogs});
 			socket.once('logmsgback', function (docs) {
 				for (var i = docs.length-1; i >= 0; i--) {
-					checkMsg('logback', docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
+					checkMsg('logback', docs[i].msg, docs[i].nick, docs[i].colorsht, docs[i].font, docs[i].size, docs[i].bold, docs[i].avatar, docs[i].type, docs[i]._id, docs[i].created, 'old', i);
 				}
 			});
 		}
@@ -672,7 +706,7 @@ function yuishout(socket) {
 		
 		($.fn.on || $.fn.live).call($(document), 'click', '#sv_banlist', function (e) {
 			e.preventDefault();
-			emitajax('message', {msg:banlist_modmsglan, colorsht: colorshout, type: 'system'});
+			emitajax('message', {msg:banlist_modmsglan, colorsht: colorshout, font: fontype, size: fontsize, bold: fontbold, type: 'system'});
 			var newlist = escapeHtml($('#ban_list').val());
 			emitajax('updbanl', {ban:newlist});
 			$.modal.close();
@@ -691,7 +725,7 @@ function yuishout(socket) {
 			socket.once('purge', function () {
 				$('.msgShout').remove();
 				setTimeout(function() {
-					emitajax('message', {msg:shout_prunedmsglan, colorsht: colorshout, type: 'system'});
+					emitajax('message', {msg:shout_prunedmsglan, colorsht: colorshout, font: fontype, size: fontsize, bold: fontbold, type: 'system'});
 				},50);
 			});
 			$.modal.close();
