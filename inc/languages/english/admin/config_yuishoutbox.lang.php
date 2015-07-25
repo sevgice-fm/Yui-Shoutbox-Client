@@ -78,6 +78,11 @@ $l['yuishoutbox_sizfont_title'] = 'Font sizes';
 $l['yuishoutbox_sizfont_desc'] = 'Set here font-size that users can use.';
 $l['yuishoutbox_deststyl_title'] = 'Desactive style select?';
 $l['yuishoutbox_deststyl_desc'] = 'Set if you want desactive style.';
+$l['yuishoutbox_dvol_title'] = 'Default volume';
+$l['yuishoutbox_dvol_desc'] = 'Choice default volume.';
+$l['yuishoutbox_dvol_opt'] = '0=Min
+0.5=Medium
+1=Max';
 $l['yuishoutbox_destindx_title'] = 'Hide Yui Shoutbox in Index page?';
 $l['yuishoutbox_destindx_desc'] = 'Set here if you want hide shoutbox in index or not.';
 $l['yuishoutbox_actport_title'] = 'Show Yui Shoutbox in Portal page?';

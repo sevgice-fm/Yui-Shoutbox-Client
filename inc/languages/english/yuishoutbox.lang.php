@@ -43,6 +43,7 @@ $l['yuishoutbox_sound_msg'] = 'Sound';
 $l['yuishoutbox_volume_msg'] = 'Volume';
 $l['yuishoutbox_vmin_msg'] = 'Min';
 $l['yuishoutbox_vmax_msg'] = 'Max';
+$l['yuishoutbox_mentsound_msg'] = 'Only on @ replies';
 $l['yuishoutbox_log_msg'] = 'Archive';
 $l['yuishoutbox_log_shout'] = 'Archive of Shoutbox';
 $l['yuishoutbox_log_next'] = 'Next';

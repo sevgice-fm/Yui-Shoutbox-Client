@@ -21,7 +21,7 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-define('YSB_PLUGIN_VER', '2.3.0');
+define('YSB_PLUGIN_VER', '2.4.0');
 
 function yuishoutbox_info()
 {
@@ -337,12 +337,22 @@ function yuishoutbox_install()
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
+		'name' => 'yuishout_def_vol',
+		'title' => $lang->yuishoutbox_dvol_title,
+		'description' => $lang->yuishoutbox_dvol_desc,
+		'optionscode' => 'radio
+'.$lang->yuishoutbox_dvol_opt.'',
+		'value' => '0',
+		'disporder' => 32,
+		'gid'		=> $groupid
+	);
+	$yuishout_setting[] = array(
 		'name' => 'yuishout_des_index',
 		'title' => $lang->yuishoutbox_destindx_title,
 		'description' => $lang->yuishoutbox_destindx_desc,
 		'optionscode' => 'yesno',
 		'value' => 0,
-		'disporder' => 32,
+		'disporder' => 33,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -351,7 +361,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_actport_desc,
 		'optionscode' => 'yesno',
 		'value' => 0,
-		'disporder' => 33,
+		'disporder' => 34,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -360,7 +370,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_banusr_desc,
 		'optionscode' => 'textarea',
 		'value' => '',
-		'disporder' => 34,
+		'disporder' => 35,
 		'gid'		=> $groupid
 	);
 	$yuishout_setting[] = array(
@@ -369,7 +379,7 @@ function yuishoutbox_install()
 		'description' => $lang->yuishoutbox_usefsockopen_desc,
 		'optionscode' => 'yesno',
 		'value' => 0,
-		'disporder' => 35,
+		'disporder' => 36,
 		'gid'		=> $groupid
 	);
 
@@ -432,7 +442,8 @@ function yuishoutbox_activate()
 	yui_smilies = {
 		{\$smilies_json}
 	},
-	fontype = fontsize = fontbold = '',
+	fontype = fontsize = fontbold = colorshout = '',
+	shoutvol = '{\$mybb->settings['yuishout_def_vol']}',
 	iclid = '{\$mybb->settings['yuishout_imgurapi']}',
 	maxnamelength = '{\$mybb->settings['maxnamelength']}',
 	ysbfontsize = '{\$mybb->settings['yuishout_styles_size']}',
@@ -471,6 +482,7 @@ function yuishoutbox_activate()
 	volume_lan = '{\$lang->yuishoutbox_volume_msg}',
 	min_lan = '{\$lang->yuishoutbox_vmin_msg}',
 	max_lan = '{\$lang->yuishoutbox_vmax_msg}',
+	ment_sound = '{\$lang->yuishoutbox_mentsound_msg}',
 	perm_msglan = '{\$lang->yuishoutbox_user_permission}',
 	err_credlan = '{\$lang->yuishoutbox_error_cred}',
 	err_fldlan = '{\$lang->yuishoutbox_error_flood}',
@@ -558,7 +570,6 @@ function yuishoutbox_activate()
 <script type=\"text/javascript\">
 <!--
 	var ysbvar = {mybbuid:'{\$mybb->user['uid']}', mybbusername:'{\$lang->guest}', mybbavatar:'{\$mybb->user['avatar']}', mybbusergroup:'{\$mybb->user['usergroup']}', Yuimodgroups:'{\$mybb->settings['yuishout_mod_grups']}', ysblc:'{\$mybb->settings['yuishout_lim_character']}', floodtime:'{\$mybb->settings['yuishout_antiflood']}'},
-	fontype = fontsize = fontbold = '',
 	ysbfontsize = '{\$mybb->settings['yuishout_styles_size']}',
 	ysbfontype = '{\$mybb->settings['yuishout_styles_font']}',
 	spo_lan = '{\$lang->yuishoutbox_spoiler}',
